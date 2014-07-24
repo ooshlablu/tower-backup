@@ -1,0 +1,11 @@
+---
+- name: Backup Tower and Restore to Second Host 
+  hosts: tower1
+  sudo: true
+  vars:
+    restore: no
+    pulldest: /tmp
+
+  roles:
+  - { role: backuptower, when: "inventory_hostname == 'tower1'" }
+  - { role: backuptower, when: "inventory_hostname == 'tower2' and restore == 'yes'"}
