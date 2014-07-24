@@ -13,8 +13,8 @@ To use:
 - Modify hosts file to have the IP address of your Tower instance(s)
 - If you are only backing up, set the restore variable to "no"
 - If you are backing up tower1 and restoring it to another Tower host (tower2 in the hosts file) then set the restore variable to "yes"
-- set your pulldest variable to the path of the local directory you want to pull the tower1 backup files to.  In this case, I pull to /tmp, however you could pull to /home/user/Documents/towerbackup (NOTE: no trailing slash in the variable, please.)
-- run the following:
+- Set your pulldest variable to the path of the local directory you want to pull the tower1 backup files to.  In this case, I pull to /tmp, however you could pull to /home/user/Documents/towerbackup (NOTE: no trailing slash in the variable, please.)
+- Run the following:
 ```
 ansible-playbook backup1-restore2.yml -i hosts
 ```
