@@ -1,0 +1,3 @@
+---
+tower-backup_ismaster: false
+pulldest: /tmp

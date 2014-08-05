@@ -1,68 +1,68 @@
 ---
 - name: pull etc and keys for tower
   synchronize: mode=pull src=/etc/awx dest={{ pulldest }}/tower.etc
-  when: inventory_hostname == "tower1"
+  when: tower-backup_ismaster == true
 
 - name: pull var lib awx for tower
   synchronize: mode=pull src=/var/lib/awx dest={{ pulldest }}/tower.var.lib
-  when: inventory_hostname == "tower1"
+  when: tower-backup_ismaster == true
 
 - name: db dump 
   shell: awx-manage dumpdata --format=json --all > {{ pulldest }}/db.json
-  when: inventory_hostname == "tower1"
+  when: tower-backup_ismaster == true
 
 - name: pull db for tower
   synchronize: mode=pull src=/tmp/db.json dest={{ pulldest }}/
-  when: inventory_hostname == "tower1"
+  when: tower-backup_ismaster == true
 
 - name: copy up db
   synchronize: src={{ pulldest }}/db.json dest=/tmp/
-  when: inventory_hostname == "tower2"
+  when: tower-backup_ismaster == false
 
 - name: restore tower1 db to tower2
   shell: awx-manage loaddata {{ pulldest }}/db.json
-  when: inventory_hostname == "tower2"
+  when: tower-backup_ismaster == false
 
 - name: stop some redhat services
   service: name={{ item }} state=stopped
   with_items:
   - supervisord
   - httpd
-  when: ansible_os_family == "RedHat" and inventory_hostname == "tower2"
+  when: ansible_os_family == "RedHat" and tower-backup_ismaster == false
 
 - name: stop some debian services
   service: name={{ item }} state=stopped
   with_items:
   - supervisor
   - apache2
-  when: ansible_os_family == "Debian" and inventory_hostname == "tower2"
+  when: ansible_os_family == "Debian" and tower-backup_ismaster == false
 
 - name: sync keys and configs for tower up
   synchronize: src={{ pulldest }}/tower.etc/awx dest=/etc/
-  when: inventory_hostname == "tower2"
+  when: tower-backup_ismaster == false
 
 - name: sync var lib awx up
   synchronize: src={{ pulldest }}/tower.var.lib/awx dest=/var/lib/
-  when: inventory_hostname == "tower2"
+  when: tower-backup_ismaster == false
 
 - name: ensure permissions are correct for /etc/awx
   shell: chown -R awx.awx /etc/awx
-  when: inventory_hostname == "tower2"
+  when: tower-backup_ismaster == false
 
 - name: ensure permissions are correct for /var/lib/awx
   shell: chown -R awx.awx /var/lib/awx
-  when: inventory_hostname == "tower2"
+  when: tower-backup_ismaster == false
 
 - name: start some redhat services
   service: name={{ item }} state=started
   with_items:
   - supervisord
   - httpd
-  when: ansible_os_family == "RedHat" and inventory_hostname == "tower2"
+  when: ansible_os_family == "RedHat" and tower-backup_ismaster == false
 
 - name: start some debian services
   service: name={{ item }} state=started
   with_items:
   - supervisor
   - apache2
-  when: ansible_os_family == "Debian" and inventory_hostname == "tower2"
+  when: ansible_os_family == "Debian" and tower-backup_ismaster == false
